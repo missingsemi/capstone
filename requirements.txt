@@ -1,0 +1,12 @@
+deliverables:
+    slackbot:
+        * replacement for google forms
+        * automatic notifications for time slots
+        * intuitive UX
+    google-sheets:
+        * store the data collected by the bot
+        * remain human readable and editable
+        * frequently sync up with the bot
+    hardware (optional):
+        * microcontroller for each machine able to detect a finish
+        * use to get more accurate notifications
