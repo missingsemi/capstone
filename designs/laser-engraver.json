@@ -1,0 +1,50 @@
+{
+    "blocks": [
+        {
+            "type": "input",
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "laser_engraver_purpose-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "What do you want to use the laser engraver for?",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+                "type": "plain_text_input",
+                "action_id": "why_laser_engraver-action"
+            },
+            "label": {
+                "type": "plain_text",
+                "text": "Why do you need to use the laser engraver instead of another tool?",
+                "emoji": true
+            }
+        },
+        {
+            "type": "input",
+            "element": {
+				"type": "radio_buttons",
+				"options": [
+					{
+						"text": {
+							"type": "plain_text",
+							"text": "Yes",
+							"emoji": true
+						},
+						"value": "yes"
+					}
+				],
+				"action_id": "file_ready-action"
+			},
+            "label": {
+                "type": "plain_text",
+                "text": "Do you have a SVG file that is ready to be laser engraved?",
+                "emoji": true
+            }
+        }
+    ]
+}
