@@ -1,13 +1,15 @@
-package main
+package view
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/missingsemi/capstone/db"
+	"github.com/missingsemi/capstone/model"
 	"github.com/slack-go/slack"
 )
 
-func TimeInformation(session *SessionInfo, sessions []*SessionInfo) slack.ModalViewRequest {
+func TimeInformation(session *model.ScheduleAddSession, sessions []*model.ScheduleAddSession) slack.ModalViewRequest {
 	var modalRequest slack.ModalViewRequest
 	duration := time.Duration(1000000000 * 60 * session.Duration)
 
@@ -72,13 +74,13 @@ func TimeInformation(session *SessionInfo, sessions []*SessionInfo) slack.ModalV
 	return modalRequest
 }
 
-func ValidTimes(machine string, duration int64, sessions []*SessionInfo) []time.Time {
-	machineInfo := MachineFromId(machine)
+func ValidTimes(machine string, duration int64, sessions []*model.ScheduleAddSession) []time.Time {
+	machineInfo := model.MachineFromId(machine)
 	if machineInfo == nil {
 		return []time.Time{}
 	}
 
-	filtered := FilterSessions(sessions, FilterOptions{
+	filtered := db.FilterSessions(sessions, db.FilterOptions{
 		Machine: machine,
 	})
 

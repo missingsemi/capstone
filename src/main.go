@@ -13,13 +13,18 @@ import (
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 	"google.golang.org/api/sheets/v4"
+
+	"github.com/missingsemi/capstone/db"
+	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
+	"github.com/missingsemi/capstone/view"
 )
 
 var service *sheets.Service
-var storedSessions []*SessionInfo
+var storedSessions []*model.ScheduleAddSession
 
 func UpdateStoredSessions() {
-	ss, err := ReadSheets(ReadOptions{
+	ss, err := db.ReadSheets(db.ReadOptions{
 		SheetId: os.Getenv("SHEET_ID"),
 		Service: service,
 		Range:   "A2:G",
@@ -31,7 +36,7 @@ func UpdateStoredSessions() {
 
 func main() {
 	godotenv.Load()
-	service, _ = InitSheets(os.Getenv("SHEETS_SERVICE_ACCOUNT_KEY"), context.Background())
+	service, _ = db.InitSheets(os.Getenv("SHEETS_SERVICE_ACCOUNT_KEY"), context.Background())
 
 	UpdateStoredSessions()
 
@@ -74,7 +79,7 @@ func main() {
 	)
 
 	go func() {
-		sessions := make(map[string]*SessionInfo)
+		sessions := make(map[string]*model.ScheduleAddSession)
 
 		for evt := range client.Events {
 			switch evt.Type {
@@ -99,12 +104,12 @@ func main() {
 	client.Run()
 }
 
-func handleEventsAPIEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*SessionInfo) error {
+func handleEventsAPIEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
 	client.Ack(*event.Request)
 	return errors.New("not implemented")
 }
 
-func handleInteractiveEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*SessionInfo) error {
+func handleInteractiveEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
 	callback, ok := event.Data.(slack.InteractionCallback)
 	if !ok {
 		return errors.New("type assertion failed")
@@ -128,17 +133,17 @@ func handleInteractiveEvent(client *socketmode.Client, event socketmode.Event, s
 		session.Machine = selectedMachine
 		sessions[userId] = session
 
-		updateView(client, event, MachineInformation(session))
+		updateView(client, event, view.MachineInformation(session))
 	} else if callback.View.CallbackID == "machine-information-callback" {
 		machineReason := callback.View.State.Values["machine_purpose_input_block"]["machine_purpose"].Value
 		machineDuration := callback.View.State.Values["duration_input_block"]["duration_select"].SelectedOption.Value
 		session := sessions[userId]
 		session.Reason = machineReason
-		session.Duration = DurationToMins(machineDuration)
+		session.Duration = util.DurationToMins(machineDuration)
 
 		sessions[userId] = session
 
-		updateView(client, event, TimeInformation(session, storedSessions))
+		updateView(client, event, view.TimeInformation(session, storedSessions))
 	} else if callback.View.CallbackID == "time-information-callback" {
 		timeSlot := callback.View.State.Values["time_input_block"]["time_select"].SelectedOption.Value
 		session := sessions[userId]
@@ -147,7 +152,7 @@ func handleInteractiveEvent(client *socketmode.Client, event socketmode.Event, s
 
 		client.Ack(*event.Request)
 
-		WriteSheets(WriteOptions{
+		db.WriteSheets(db.WriteOptions{
 			SheetId: os.Getenv("SHEET_ID"),
 			Service: service,
 			Range:   "A2:G",
@@ -175,7 +180,7 @@ func updateView(client *socketmode.Client, event socketmode.Event, view slack.Mo
 	})
 }
 
-func handleSlashCommandEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*SessionInfo) error {
+func handleSlashCommandEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
 	command, ok := event.Data.(slack.SlashCommand)
 	if !ok {
 		return errors.New("type assertion failed")
@@ -184,7 +189,7 @@ func handleSlashCommandEvent(client *socketmode.Client, event socketmode.Event, 
 	if command.Command == "/test" {
 
 		// Slash command will always open the first modal.
-		view := TeamInformation()
+		view := view.TeamInformation()
 		resp, err := client.OpenView(command.TriggerID, view)
 		if err != nil {
 			return err
@@ -194,7 +199,7 @@ func handleSlashCommandEvent(client *socketmode.Client, event socketmode.Event, 
 		userId := command.UserID
 		userName := command.UserName
 		viewId := resp.View.ID
-		session := &SessionInfo{}
+		session := &model.ScheduleAddSession{}
 		session.UserId = userId
 		session.UserName = userName
 		session.ViewId = viewId

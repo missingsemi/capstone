@@ -1,4 +1,4 @@
-module github.com/missingsemi/fchs-capstone
+module github.com/missingsemi/capstone
 
 go 1.17
 

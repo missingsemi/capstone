@@ -1,15 +1,16 @@
-package main
+package view
 
 import (
 	"fmt"
 
+	"github.com/missingsemi/capstone/model"
 	"github.com/slack-go/slack"
 )
 
-func MachineInformation(session *SessionInfo) slack.ModalViewRequest {
+func MachineInformation(session *model.ScheduleAddSession) slack.ModalViewRequest {
 	var modalRequest slack.ModalViewRequest
 
-	machine := MachineFromId(session.Machine)
+	machine := model.MachineFromId(session.Machine)
 
 	title := machine.TitleName
 	purposeQuestion := fmt.Sprintf("What do you want to use the %s for?", machine.Name)

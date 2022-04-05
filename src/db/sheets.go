@@ -1,8 +1,9 @@
-package main
+package db
 
 import (
 	"context"
 
+	"github.com/missingsemi/capstone/model"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
@@ -10,7 +11,7 @@ import (
 type WriteOptions struct {
 	SheetId string
 	Range   string
-	Session *SessionInfo
+	Session *model.ScheduleAddSession
 	Service *sheets.Service
 }
 
@@ -48,7 +49,7 @@ func WriteSheets(options WriteOptions) error {
 	return nil
 }
 
-func ReadSheets(options ReadOptions) ([]*SessionInfo, error) {
+func ReadSheets(options ReadOptions) ([]*model.ScheduleAddSession, error) {
 	resp, err := options.Service.Spreadsheets.Values.Get(
 		options.SheetId,
 		options.Range,
@@ -57,7 +58,7 @@ func ReadSheets(options ReadOptions) ([]*SessionInfo, error) {
 		return nil, err
 	}
 
-	result := make([]*SessionInfo, 0)
+	result := make([]*model.ScheduleAddSession, 0)
 	for _, row := range resp.Values {
 		session := SessionFromRow(row)
 		if session != nil {
@@ -73,8 +74,8 @@ type FilterOptions struct {
 	Machine string
 }
 
-func FilterSessions(sessions []*SessionInfo, options FilterOptions) []*SessionInfo {
-	result := make([]*SessionInfo, 0)
+func FilterSessions(sessions []*model.ScheduleAddSession, options FilterOptions) []*model.ScheduleAddSession {
+	result := make([]*model.ScheduleAddSession, 0)
 	for _, session := range sessions {
 		if options.UserId != "" && options.UserId != session.UserId {
 			continue

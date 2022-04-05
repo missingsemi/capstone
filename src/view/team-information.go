@@ -1,12 +1,15 @@
-package main
+package view
 
-import "github.com/slack-go/slack"
+import (
+	"github.com/missingsemi/capstone/model"
+	"github.com/slack-go/slack"
+)
 
 func TeamInformation() slack.ModalViewRequest {
 	var modalRequest slack.ModalViewRequest
 
-	machineSelectOptions := make([]*slack.OptionBlockObject, len(Machines))
-	for i, machine := range Machines {
+	machineSelectOptions := make([]*slack.OptionBlockObject, len(model.Machines))
+	for i, machine := range model.Machines {
 		machineSelectOptions[i] = slack.NewOptionBlockObject(
 			machine.Id,
 			slack.NewTextBlockObject(
