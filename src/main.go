@@ -1,44 +1,28 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/missingsemi/capstone/controller"
+	"github.com/missingsemi/capstone/database"
+	"github.com/missingsemi/capstone/model"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
-	"google.golang.org/api/sheets/v4"
-
-	"github.com/missingsemi/capstone/db"
-	"github.com/missingsemi/capstone/model"
-	"github.com/missingsemi/capstone/util"
-	"github.com/missingsemi/capstone/view"
 )
-
-var service *sheets.Service
-var storedSessions []*model.ScheduleAddSession
-
-func UpdateStoredSessions() {
-	ss, err := db.ReadSheets(db.ReadOptions{
-		SheetId: os.Getenv("SHEET_ID"),
-		Service: service,
-		Range:   "A2:G",
-	})
-	if err == nil {
-		storedSessions = ss
-	}
-}
 
 func main() {
 	godotenv.Load()
-	service, _ = db.InitSheets(os.Getenv("SHEETS_SERVICE_ACCOUNT_KEY"), context.Background())
+	database.SqliteInit()
+	defer database.SqliteDeinit()
 
-	UpdateStoredSessions()
+	sessions := make(map[string]model.ScheduleSession)
+	controller.RegisterCallbackHandler("schedule_add-machine_information-callback", controller.CallbackMachineInformation, sessions)
+	controller.RegisterCallbackHandler("schedule_add-team_information-callback", controller.CallbackTeamInformation, sessions)
+	controller.RegisterCallbackHandler("schedule_add-time_information-callback", controller.CallbackTimeInformation, sessions)
+	controller.RegisterCommandHandler("/test", controller.CommandSchedule, sessions)
 
 	// Bot initialization code adapted from
 	// https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
@@ -68,19 +52,17 @@ func main() {
 	api := slack.New(
 		botToken,
 		slack.OptionDebug(true),
-		slack.OptionLog(log.New(os.Stdout, "api: ", log.Lshortfile|log.LstdFlags)),
+		//slack.OptionLog(log.New(os.Stdout, "api: ", log.Lshortfile|log.LstdFlags)),
 		slack.OptionAppLevelToken(appToken),
 	)
 
 	client := socketmode.New(
 		api,
 		socketmode.OptionDebug(true),
-		socketmode.OptionLog(log.New(os.Stdout, "socket: ", log.Lshortfile|log.LstdFlags)),
+		//socketmode.OptionLog(log.New(os.Stdout, "socket: ", log.Lshortfile|log.LstdFlags)),
 	)
 
 	go func() {
-		sessions := make(map[string]*model.ScheduleAddSession)
-
 		for evt := range client.Events {
 			switch evt.Type {
 			case socketmode.EventTypeConnecting:
@@ -90,11 +72,19 @@ func main() {
 			case socketmode.EventTypeConnected:
 				fmt.Println("Connected to Slack in Socket Mode")
 			case socketmode.EventTypeEventsAPI:
-				handleEventsAPIEvent(client, evt, sessions)
+				client.Ack(*evt.Request)
 			case socketmode.EventTypeInteractive:
-				handleInteractiveEvent(client, evt, sessions)
+				callback, ok := evt.Data.(slack.InteractionCallback)
+				if !ok {
+					client.Ack(*evt.Request)
+				}
+				controller.CallCallbackHandler(callback.View.CallbackID, client, evt)
 			case socketmode.EventTypeSlashCommand:
-				handleSlashCommandEvent(client, evt, sessions)
+				cmd, ok := evt.Data.(slack.SlashCommand)
+				if !ok {
+					client.Ack(*evt.Request)
+				}
+				controller.CallCommandHandler(cmd.Command, client, evt)
 			default:
 				fmt.Fprintf(os.Stderr, "Unexpected event type recieved: %s\n", evt.Type)
 			}
@@ -102,113 +92,4 @@ func main() {
 	}()
 
 	client.Run()
-}
-
-func handleEventsAPIEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
-	client.Ack(*event.Request)
-	return errors.New("not implemented")
-}
-
-func handleInteractiveEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
-	callback, ok := event.Data.(slack.InteractionCallback)
-	if !ok {
-		return errors.New("type assertion failed")
-	}
-
-	userId := callback.User.ID
-
-	// Delete the ongoing session if the user closed the modal
-	if callback.Type == slack.InteractionTypeViewClosed {
-		delete(sessions, userId)
-		client.Ack(*event.Request)
-		return nil
-	}
-
-	if callback.View.CallbackID == "team-information-callback" {
-		// Get the submitted values and put them in the session object for this user
-		selectedMachine := callback.View.State.Values["machine_input_block"]["machine_select"].SelectedOption.Value
-		selectedUsers := callback.View.State.Values["users_input_block"]["users_select"].SelectedUsers
-		session := sessions[userId]
-		session.GroupIds = selectedUsers
-		session.Machine = selectedMachine
-		sessions[userId] = session
-
-		updateView(client, event, view.MachineInformation(session))
-	} else if callback.View.CallbackID == "machine-information-callback" {
-		machineReason := callback.View.State.Values["machine_purpose_input_block"]["machine_purpose"].Value
-		machineDuration := callback.View.State.Values["duration_input_block"]["duration_select"].SelectedOption.Value
-		session := sessions[userId]
-		session.Reason = machineReason
-		session.Duration = util.DurationToMins(machineDuration)
-
-		sessions[userId] = session
-
-		updateView(client, event, view.TimeInformation(session, storedSessions))
-	} else if callback.View.CallbackID == "time-information-callback" {
-		timeSlot := callback.View.State.Values["time_input_block"]["time_select"].SelectedOption.Value
-		session := sessions[userId]
-		session.Time, _ = time.Parse(time.RFC3339, timeSlot)
-		sessions[userId] = session
-
-		client.Ack(*event.Request)
-
-		db.WriteSheets(db.WriteOptions{
-			SheetId: os.Getenv("SHEET_ID"),
-			Service: service,
-			Range:   "A2:G",
-			Session: session,
-		})
-
-	} else {
-		// Required Ack so slack knows the bot didn't die
-		client.Ack(*event.Request)
-	}
-
-	go UpdateStoredSessions()
-
-	// No error, return nil.
-	return nil
-}
-
-func updateView(client *socketmode.Client, event socketmode.Event, view slack.ModalViewRequest) {
-	client.Ack(*event.Request, struct {
-		ResponseAction string      `json:"response_action"`
-		View           interface{} `json:"view"`
-	}{
-		ResponseAction: "update",
-		View:           view,
-	})
-}
-
-func handleSlashCommandEvent(client *socketmode.Client, event socketmode.Event, sessions map[string]*model.ScheduleAddSession) error {
-	command, ok := event.Data.(slack.SlashCommand)
-	if !ok {
-		return errors.New("type assertion failed")
-	}
-
-	if command.Command == "/test" {
-
-		// Slash command will always open the first modal.
-		view := view.TeamInformation()
-		resp, err := client.OpenView(command.TriggerID, view)
-		if err != nil {
-			return err
-		}
-
-		// Store a session keyed on the userId.
-		userId := command.UserID
-		userName := command.UserName
-		viewId := resp.View.ID
-		session := &model.ScheduleAddSession{}
-		session.UserId = userId
-		session.UserName = userName
-		session.ViewId = viewId
-		sessions[userId] = session
-
-		client.Ack(*event.Request)
-	} else if command.Command == "/refresh" {
-		UpdateStoredSessions()
-		client.Ack(*event.Request)
-	}
-	return nil
 }

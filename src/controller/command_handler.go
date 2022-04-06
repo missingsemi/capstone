@@ -3,26 +3,33 @@ package controller
 import (
 	"errors"
 
-	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
 
-type CommandHandler = func(*socketmode.Client, slack.SlashCommand) error
+type CommandHandlerFunc = func(*socketmode.Client, socketmode.Event, interface{}) error
 
-var commandHandlers map[string]CommandHandler
-
-func RegisterCommandHandler(command string, cmdh CommandHandler) {
-	commandHandlers[command] = cmdh
+type CommandHandler struct {
+	fn   CommandHandlerFunc
+	data interface{}
 }
 
-func UnregisterCommandHandler(command string) {
-	delete(commandHandlers, command)
+var commandHandlers map[string]CommandHandler = make(map[string]CommandHandler)
+
+func RegisterCommandHandler(commandId string, fn CommandHandlerFunc, data interface{}) {
+	commandHandlers[commandId] = CommandHandler{
+		fn,
+		data,
+	}
 }
 
-func CallCommandHandler(command string, client *socketmode.Client, slashCommand slack.SlashCommand) error {
-	if cmdh, ok := commandHandlers[command]; ok {
-		return cmdh(client, slashCommand)
+func UnregisterCommandHandler(commandId string) {
+	delete(commandHandlers, commandId)
+}
+
+func CallCommandHandler(commandId string, client *socketmode.Client, event socketmode.Event) error {
+	if cbh, ok := commandHandlers[commandId]; ok {
+		return cbh.fn(client, event, cbh.data)
 	} else {
-		return errors.New("No handler registered for command \"" + command + "\".")
+		return errors.New("No handler registered for commandId \"" + commandId + "\".")
 	}
 }

@@ -4,10 +4,9 @@ import (
 	"time"
 )
 
-type ScheduleAddSession struct {
-	ViewId   string
+type ScheduleSession struct {
+	Id       int
 	UserId   string
-	UserName string
 	GroupIds []string
 	Machine  string
 	Reason   string
