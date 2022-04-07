@@ -20,3 +20,9 @@ CREATE TABLE schedule (
   time DATETIME NOT NULL,
   FOREIGN KEY(machine_id) REFERENCES machine(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- table with a list of admins
+CREATE TABLE admins (
+  id INTEGER PRIMARY KEY,
+  user_id TEXT NOT NULL
+);

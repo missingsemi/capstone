@@ -21,7 +21,15 @@ func CommandMachines(client *socketmode.Client, event socketmode.Event, data int
 		return err
 	}
 
-	modalView := view.AdminMachinesAvailableMachines(machines)
+	isAdmin, _ := database.IsUserAdmin(command.UserID)
+
+	var modalView slack.ModalViewRequest
+
+	if isAdmin {
+		modalView = view.AdminMachinesAvailableMachines(machines)
+	} else {
+		modalView = view.UserMachinesAvailableMachines(machines)
+	}
 
 	_, err = client.OpenView(command.TriggerID, modalView)
 	if err != nil {
