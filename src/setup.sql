@@ -21,3 +21,9 @@ CREATE TABLE schedule (
   stage INTEGER NOT NULL DEFAULT 0,
   FOREIGN KEY(machine_id) REFERENCES machine(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+-- table with a list of admins
+CREATE TABLE admins (
+  id INTEGER PRIMARY KEY,
+  user_id TEXT NOT NULL
+);
