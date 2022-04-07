@@ -27,6 +27,8 @@ func main() {
 
 	controller.RegisterCommandHandler("/machines", controller.CommandMachines, nil)
 	controller.RegisterCallbackHandler("admin_machines-available_machines-callback", controller.CallbackAvailableMachines, nil)
+	controller.RegisterCallbackHandler("admin_machines-edit_machine-callback", controller.CallbackEditMachine, nil)
+	controller.RegisterCallbackHandler("admin_machines-create_machine-callback", controller.CallbackCreateMachine, nil)
 
 	// Bot initialization code adapted from
 	// https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go
