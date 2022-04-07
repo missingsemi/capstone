@@ -12,4 +12,5 @@ type ScheduleSession struct {
 	Reason   string
 	Duration int64
 	Time     time.Time
+	Stage    int
 }

@@ -20,7 +20,7 @@ func GetSessions() ([]model.ScheduleSession, error) {
 		session := model.ScheduleSession{}
 		var datetime string
 		var groupIds string
-		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime)
+		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime, &session.Stage)
 		if err != nil {
 			return sessions, err
 		}
@@ -56,7 +56,7 @@ func GetSessionsAfterTimeByMachine(datetime time.Time, machineId string) ([]mode
 		session := model.ScheduleSession{}
 		var datetime string
 		var groupIds string
-		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime)
+		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime, &session.Stage)
 		if err != nil {
 			return sessions, err
 		}
@@ -83,7 +83,7 @@ func GetSessionById(id int) (model.ScheduleSession, error) {
 	session := model.ScheduleSession{}
 	var datetime string
 	var groupIds string
-	err = stmt.QueryRow(id).Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime)
+	err = stmt.QueryRow(id).Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime, &session.Stage)
 	if err != nil {
 		return model.ScheduleSession{}, err
 	}
@@ -114,7 +114,7 @@ func CreateSession(session model.ScheduleSession) error {
 }
 
 func ModifySession(id int, session model.ScheduleSession) error {
-	stmt, err := db.Prepare("UPDATE schedule SET user_id = ?, group_ids = ?, machine_id = ?, reason = ?, duration = ?, time = ? WHERE id = ?")
+	stmt, err := db.Prepare("UPDATE schedule SET user_id = ?, group_ids = ?, machine_id = ?, reason = ?, duration = ?, time = ?, stage = ? WHERE id = ?")
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func ModifySession(id int, session model.ScheduleSession) error {
 		groupIds += id
 	}
 
-	_, err = stmt.Exec(session.UserId, groupIds, session.Machine, session.Reason, session.Duration, session.Time.Format(time.RFC3339), id)
+	_, err = stmt.Exec(session.UserId, groupIds, session.Machine, session.Reason, session.Duration, session.Time.Format(time.RFC3339), session.Stage, id)
 	return err
 }
 
@@ -138,4 +138,34 @@ func DeleteSession(id int) error {
 
 	_, err = stmt.Exec(id)
 	return err
+}
+
+func GetUnfinishedSessions() ([]model.ScheduleSession, error) {
+	rows, err := db.Query("SELECT * FROM schedule WHERE NOT stage = 4;")
+	if err != nil {
+		return []model.ScheduleSession{}, err
+	}
+	defer rows.Close()
+
+	sessions := make([]model.ScheduleSession, 0)
+
+	for rows.Next() {
+		session := model.ScheduleSession{}
+		var datetime string
+		var groupIds string
+		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime, &session.Stage)
+		if err != nil {
+			return sessions, err
+		}
+		dateObj, err := time.Parse(time.RFC3339, datetime)
+		if err != nil {
+			return sessions, err
+		}
+		session.Time = dateObj
+		splitIds := strings.Split(groupIds, ",")
+		session.GroupIds = splitIds
+		sessions = append(sessions, session)
+	}
+
+	return sessions, nil
 }
