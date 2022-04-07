@@ -19,10 +19,14 @@ func main() {
 	defer database.SqliteDeinit()
 
 	sessions := make(map[string]model.ScheduleSession)
-	controller.RegisterCallbackHandler("schedule_add-machine_information-callback", controller.CallbackMachineInformation, sessions)
-	controller.RegisterCallbackHandler("schedule_add-team_information-callback", controller.CallbackTeamInformation, sessions)
-	controller.RegisterCallbackHandler("schedule_add-time_information-callback", controller.CallbackTimeInformation, sessions)
+
 	controller.RegisterCommandHandler("/test", controller.CommandSchedule, sessions)
+	controller.RegisterCallbackHandler("schedule_add-team_information-callback", controller.CallbackTeamInformation, sessions)
+	controller.RegisterCallbackHandler("schedule_add-machine_information-callback", controller.CallbackMachineInformation, sessions)
+	controller.RegisterCallbackHandler("schedule_add-time_information-callback", controller.CallbackTimeInformation, sessions)
+
+	controller.RegisterCommandHandler("/machines", controller.CommandMachines, nil)
+	controller.RegisterCallbackHandler("admin_machines-available_machines-callback", controller.CallbackAvailableMachines, nil)
 
 	// Bot initialization code adapted from
 	// https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go

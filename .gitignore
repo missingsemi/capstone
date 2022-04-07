@@ -1,2 +1,4 @@
 .env
 sheets-key.json
+*.db
+*.exe

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/missingsemi/capstone/database"
@@ -25,14 +24,9 @@ func CallbackTimeInformation(client *socketmode.Client, event socketmode.Event, 
 	timeStr := callback.View.State.Values["time_input_block"]["time_input"].SelectedOption.Value
 	session := sessions[callback.User.ID]
 
-	fmt.Printf("timeStr = %s\n", timeStr)
-
 	session.Time, _ = time.Parse(time.RFC3339, timeStr)
 
-	err := database.CreateSession(session)
-	if err != nil {
-		fmt.Printf("final err = %v", err)
-	}
+	database.CreateSession(session)
 	delete(sessions, callback.User.ID)
 
 	client.Ack(*event.Request)

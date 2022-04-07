@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/missingsemi/capstone/database"
@@ -33,8 +32,6 @@ func CallbackMachineInformation(client *socketmode.Client, event socketmode.Even
 	machine, _ := database.GetMachineById(session.Machine)
 	// Only have to consider sessions that could still be ongoing at the current time, so time.Now() - 4h
 	validTimes := util.GenerateValidTimes(machine, int(duration))
-
-	fmt.Println(view.ScheduleAddTimeInformation(validTimes))
 
 	util.UpdateView(client, event, view.ScheduleAddTimeInformation(validTimes))
 
