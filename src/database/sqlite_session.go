@@ -141,7 +141,7 @@ func DeleteSession(id int) error {
 }
 
 func GetUnfinishedSessions() ([]model.ScheduleSession, error) {
-	rows, err := db.Query("SELECT * FROM schedule WHERE NOT stage = 0;")
+	rows, err := db.Query("SELECT * FROM schedule WHERE NOT stage = 4;")
 	if err != nil {
 		return []model.ScheduleSession{}, err
 	}

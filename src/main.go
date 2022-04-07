@@ -9,6 +9,7 @@ import (
 	"github.com/missingsemi/capstone/controller"
 	"github.com/missingsemi/capstone/database"
 	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -61,6 +62,8 @@ func main() {
 		socketmode.OptionDebug(true),
 		//socketmode.OptionLog(log.New(os.Stdout, "socket: ", log.Lshortfile|log.LstdFlags)),
 	)
+
+	go util.Notify(api)
 
 	go func() {
 		for evt := range client.Events {
