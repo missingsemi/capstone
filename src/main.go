@@ -25,10 +25,6 @@ func main() {
 	controller.RegisterCallbackHandler("user_schedule-create_session_1-callback", controller.CallbackCreateSession1, nil)
 	controller.RegisterCallbackHandler("user_schedule-create_session_2-callback", controller.CallbackCreateSession2, nil)
 
-	controller.RegisterCallbackHandler("schedule_add-team_information-callback", controller.CallbackTeamInformation, sessions)
-	controller.RegisterCallbackHandler("schedule_add-machine_information-callback", controller.CallbackMachineInformation, sessions)
-	controller.RegisterCallbackHandler("schedule_add-time_information-callback", controller.CallbackTimeInformation, sessions)
-
 	controller.RegisterCommandHandler("/machines", controller.CommandMachines, nil)
 	controller.RegisterCallbackHandler("admin_machines-available_machines-callback", controller.CallbackAvailableMachines, nil)
 	controller.RegisterCallbackHandler("admin_machines-edit_machine-callback", controller.CallbackEditMachine, nil)
