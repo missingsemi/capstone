@@ -1,10 +1,10 @@
-package util
+package controller
 
 import (
 	"time"
 
 	"github.com/missingsemi/capstone/database"
-	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
 	"github.com/missingsemi/capstone/view"
 	"github.com/slack-go/slack"
 )
@@ -21,7 +21,7 @@ func Notify(api *slack.Client) {
 		}
 
 		for _, session := range sessions {
-			machine := filterMachine(session.Machine, machines)
+			machine := util.FilterMachine(session.Machine, machines)
 
 			if session.Stage == 0 && session.Time.Sub(time.Now()) < 5*time.Minute {
 				// notify that session is coming up in < 5 mins
@@ -58,14 +58,4 @@ func Notify(api *slack.Client) {
 			}
 		}
 	}
-}
-
-func filterMachine(id string, machines []model.Machine) model.Machine {
-	for _, machine := range machines {
-		if machine.Id == id {
-			return machine
-		}
-	}
-
-	return model.Machine{}
 }

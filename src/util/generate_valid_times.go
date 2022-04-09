@@ -67,7 +67,7 @@ func applySessions(sessions []model.ScheduleSession, lowerBound time.Time, now t
 	for _, session := range sessions {
 		lowerIndex := toIndex(now, session.Time)
 		blocks := session.Duration / 15
-		for i := lowerIndex; i < lowerIndex+blocks; i++ {
+		for i := lowerIndex; i < lowerIndex+blocks && i < 96; i++ {
 			if i < 0 {
 				continue
 			}

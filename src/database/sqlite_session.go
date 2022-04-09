@@ -169,3 +169,39 @@ func GetUnfinishedSessions() ([]model.ScheduleSession, error) {
 
 	return sessions, nil
 }
+
+func GetUpcomingSessionsByUser(userId string) ([]model.ScheduleSession, error) {
+	stmt, err := db.Prepare("SELECT * FROM schedule WHERE time > ? AND user_id = ?;")
+	if err != nil {
+		return []model.ScheduleSession{}, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(time.Now().Format(time.RFC3339), userId)
+	if err != nil {
+		return []model.ScheduleSession{}, err
+	}
+	defer rows.Close()
+
+	sessions := make([]model.ScheduleSession, 0)
+
+	for rows.Next() {
+		session := model.ScheduleSession{}
+		var datetime string
+		var groupIds string
+		err := rows.Scan(&session.Id, &session.UserId, &groupIds, &session.Machine, &session.Reason, &session.Duration, &datetime, &session.Stage)
+		if err != nil {
+			return sessions, err
+		}
+		dateObj, err := time.Parse(time.RFC3339, datetime)
+		if err != nil {
+			return sessions, err
+		}
+		session.Time = dateObj
+		splitIds := strings.Split(groupIds, ",")
+		session.GroupIds = splitIds
+		sessions = append(sessions, session)
+	}
+
+	return sessions, nil
+}

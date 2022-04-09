@@ -9,7 +9,6 @@ import (
 	"github.com/missingsemi/capstone/controller"
 	"github.com/missingsemi/capstone/database"
 	"github.com/missingsemi/capstone/model"
-	"github.com/missingsemi/capstone/util"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -22,6 +21,10 @@ func main() {
 	sessions := make(map[string]model.ScheduleSession)
 
 	controller.RegisterCommandHandler("/test", controller.CommandSchedule, sessions)
+	controller.RegisterCallbackHandler("user_schedule-created_sessions-callback", controller.CallbackCreatedSessions, nil)
+	controller.RegisterCallbackHandler("user_schedule-create_session_1-callback", controller.CallbackCreateSession1, nil)
+	controller.RegisterCallbackHandler("user_schedule-create_session_2-callback", controller.CallbackCreateSession2, nil)
+
 	controller.RegisterCallbackHandler("schedule_add-team_information-callback", controller.CallbackTeamInformation, sessions)
 	controller.RegisterCallbackHandler("schedule_add-machine_information-callback", controller.CallbackMachineInformation, sessions)
 	controller.RegisterCallbackHandler("schedule_add-time_information-callback", controller.CallbackTimeInformation, sessions)
@@ -69,7 +72,7 @@ func main() {
 		//socketmode.OptionLog(log.New(os.Stdout, "socket: ", log.Lshortfile|log.LstdFlags)),
 	)
 
-	go util.Notify(api)
+	go controller.Notify(api)
 
 	go func() {
 		for evt := range client.Events {

@@ -4,21 +4,20 @@ import (
 	"errors"
 
 	"github.com/missingsemi/capstone/database"
-	"github.com/missingsemi/capstone/model"
 	"github.com/missingsemi/capstone/view"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
 
 func CommandSchedule(client *socketmode.Client, event socketmode.Event, data interface{}) error {
-	sessions, ok := data.(map[string]model.ScheduleSession)
+	command, ok := event.Data.(slack.SlashCommand)
 	if !ok {
 		return errors.New("type assertion failed")
 	}
 
-	command, ok := event.Data.(slack.SlashCommand)
-	if !ok {
-		return errors.New("type assertion failed")
+	sessions, err := database.GetUpcomingSessionsByUser(command.UserID)
+	if err != nil {
+		return err
 	}
 
 	machines, err := database.GetMachines()
@@ -26,15 +25,12 @@ func CommandSchedule(client *socketmode.Client, event socketmode.Event, data int
 		return err
 	}
 
-	modalView := view.ScheduleAddTeamInformation(machines)
+	modalView := view.UserScheduleCreatedSessions(sessions, machines)
+
 	_, err = client.OpenView(command.TriggerID, modalView)
 	if err != nil {
 		return err
 	}
-
-	session := model.ScheduleSession{}
-	session.UserId = command.UserID
-	sessions[command.UserID] = session
 
 	client.Ack(*event.Request)
 	return nil
