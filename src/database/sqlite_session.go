@@ -171,7 +171,7 @@ func GetUnfinishedSessions() ([]model.ScheduleSession, error) {
 }
 
 func GetUpcomingSessionsByUser(userId string) ([]model.ScheduleSession, error) {
-	stmt, err := db.Prepare("SELECT * FROM schedule WHERE time > ? AND user_id = ?;")
+	stmt, err := db.Prepare("SELECT * FROM schedule WHERE time > ? AND user_id = ? ORDER BY time ASC;")
 	if err != nil {
 		return []model.ScheduleSession{}, err
 	}
