@@ -8,7 +8,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/missingsemi/capstone/controller"
 	"github.com/missingsemi/capstone/database"
-	"github.com/missingsemi/capstone/model"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -18,17 +17,15 @@ func main() {
 	database.SqliteInit()
 	defer database.SqliteDeinit()
 
-	sessions := make(map[string]model.ScheduleSession)
+	controller.RegisterCommandHandler("/test", controller.CommandSchedule)
+	controller.RegisterCallbackHandler("user_schedule-created_sessions-callback", controller.CallbackCreatedSessions)
+	controller.RegisterCallbackHandler("user_schedule-create_session_1-callback", controller.CallbackCreateSession1)
+	controller.RegisterCallbackHandler("user_schedule-create_session_2-callback", controller.CallbackCreateSession2)
 
-	controller.RegisterCommandHandler("/test", controller.CommandSchedule, sessions)
-	controller.RegisterCallbackHandler("user_schedule-created_sessions-callback", controller.CallbackCreatedSessions, nil)
-	controller.RegisterCallbackHandler("user_schedule-create_session_1-callback", controller.CallbackCreateSession1, nil)
-	controller.RegisterCallbackHandler("user_schedule-create_session_2-callback", controller.CallbackCreateSession2, nil)
-
-	controller.RegisterCommandHandler("/machines", controller.CommandMachines, nil)
-	controller.RegisterCallbackHandler("admin_machines-available_machines-callback", controller.CallbackAvailableMachines, nil)
-	controller.RegisterCallbackHandler("admin_machines-edit_machine-callback", controller.CallbackEditMachine, nil)
-	controller.RegisterCallbackHandler("admin_machines-create_machine-callback", controller.CallbackCreateMachine, nil)
+	controller.RegisterCommandHandler("/machines", controller.CommandMachines)
+	controller.RegisterCallbackHandler("admin_machines-available_machines-callback", controller.CallbackAvailableMachines)
+	controller.RegisterCallbackHandler("admin_machines-edit_machine-callback", controller.CallbackEditMachine)
+	controller.RegisterCallbackHandler("admin_machines-create_machine-callback", controller.CallbackCreateMachine)
 
 	// Bot initialization code adapted from
 	// https://github.com/slack-go/slack/blob/master/examples/socketmode/socketmode.go

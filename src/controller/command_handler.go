@@ -6,20 +6,12 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
-type CommandHandlerFunc = func(*socketmode.Client, socketmode.Event, interface{}) error
+type CommandHandlerFunc = func(*socketmode.Client, socketmode.Event) error
 
-type CommandHandler struct {
-	fn   CommandHandlerFunc
-	data interface{}
-}
+var commandHandlers map[string]CommandHandlerFunc = make(map[string]CommandHandlerFunc)
 
-var commandHandlers map[string]CommandHandler = make(map[string]CommandHandler)
-
-func RegisterCommandHandler(commandId string, fn CommandHandlerFunc, data interface{}) {
-	commandHandlers[commandId] = CommandHandler{
-		fn,
-		data,
-	}
+func RegisterCommandHandler(commandId string, fn CommandHandlerFunc) {
+	commandHandlers[commandId] = fn
 }
 
 func UnregisterCommandHandler(commandId string) {
@@ -27,8 +19,8 @@ func UnregisterCommandHandler(commandId string) {
 }
 
 func CallCommandHandler(commandId string, client *socketmode.Client, event socketmode.Event) error {
-	if cbh, ok := commandHandlers[commandId]; ok {
-		return cbh.fn(client, event, cbh.data)
+	if fn, ok := commandHandlers[commandId]; ok {
+		return fn(client, event)
 	} else {
 		return errors.New("No handler registered for commandId \"" + commandId + "\".")
 	}

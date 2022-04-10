@@ -12,7 +12,7 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
-func CallbackCreateMachine(client *socketmode.Client, event socketmode.Event, data interface{}) error {
+func CallbackCreateMachine(client *socketmode.Client, event socketmode.Event) error {
 	callback, ok := event.Data.(slack.InteractionCallback)
 	if !ok {
 		return errors.New("type assertion failed")

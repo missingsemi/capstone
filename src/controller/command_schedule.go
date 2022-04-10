@@ -9,7 +9,7 @@ import (
 	"github.com/slack-go/slack/socketmode"
 )
 
-func CommandSchedule(client *socketmode.Client, event socketmode.Event, data interface{}) error {
+func CommandSchedule(client *socketmode.Client, event socketmode.Event) error {
 	command, ok := event.Data.(slack.SlashCommand)
 	if !ok {
 		return errors.New("type assertion failed")
