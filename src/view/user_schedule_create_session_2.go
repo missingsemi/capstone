@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
 	"github.com/slack-go/slack"
 )
 
@@ -15,7 +16,7 @@ func UserScheduleCreateSession2(partialSession model.ScheduleSession, validTimes
 	timeSelectOptions := make([]*slack.OptionBlockObject, len(validTimes))
 
 	for i, timeSlot := range validTimes {
-		beginTime := timeSlot.Format(time.RFC3339)
+		beginTime := timeSlot.Format(util.FriendlyFormat)
 		timeSelectOptions[i] = slack.NewOptionBlockObject(
 			timeSlot.Format(time.RFC3339),
 			slack.NewTextBlockObject(

@@ -2,7 +2,6 @@ package view
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/missingsemi/capstone/model"
 	"github.com/missingsemi/capstone/util"
@@ -71,7 +70,7 @@ func UserScheduleCreatedSessions(sessions []model.ScheduleSession, machines []mo
 		sessionBlocks[3*i+1] = slack.NewSectionBlock(
 			slack.NewTextBlockObject(
 				"mrkdwn",
-				fmt.Sprintf("*%s* @ %s - %d Minutes", machine.TitleName, session.Time.Format(time.RFC3339), session.Duration),
+				fmt.Sprintf("*%s* @ %s - %d Minutes", machine.TitleName, session.Time.Format(util.FriendlyFormat), session.Duration),
 				false,
 				false,
 			),

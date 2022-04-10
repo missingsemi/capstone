@@ -2,9 +2,9 @@ package view
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
 	"github.com/slack-go/slack"
 )
 
@@ -12,7 +12,7 @@ func ScheduleNotification(session model.ScheduleSession, machine model.Machine) 
 	if session.Stage == 0 {
 		return []slack.MsgOption{
 			slack.MsgOptionText(
-				fmt.Sprintf("Your %s session for the %s will be starting in less than five minutes.", session.Time.Format(time.RFC3339), machine.Name),
+				fmt.Sprintf("Your %s session for the %s will be starting in less than five minutes.", session.Time.Format(util.FriendlyFormat), machine.Name),
 				false,
 			),
 		}
