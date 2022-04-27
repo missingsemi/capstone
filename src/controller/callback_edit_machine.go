@@ -45,10 +45,14 @@ func CallbackEditMachine(client *socketmode.Client, event socketmode.Event) erro
 		var err error
 		parsedCount, err = strconv.ParseInt(callback.View.State.Values["count_input_block"]["count_input"].Value, 10, 32)
 		if err != nil {
-			errors := make(map[string]string, 1)
-			errors["count_input_block"] = "Count must be an integer"
 
-			util.ErrorView(client, event, errors)
+			util.ErrorView(
+				client,
+				event,
+				map[string]string{
+					"count_input_block": "Count must be an integer.",
+				},
+			)
 
 			return err
 		}
