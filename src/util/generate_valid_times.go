@@ -50,10 +50,9 @@ func GenerateValidTimes(machine model.Machine, duration int) []time.Time {
 		if count >= duration/15 {
 			offset := 15 * (i - duration/15 + 1) * int(time.Minute)
 			t := now.Add(time.Duration(offset))
-			availableTimes = append(availableTimes, t)
-		}
-		if len(availableTimes) == 10 {
-			break
+			if DuringOfficeHours(t) {
+				availableTimes = append(availableTimes, t)
+			}
 		}
 	}
 
