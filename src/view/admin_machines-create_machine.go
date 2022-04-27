@@ -95,7 +95,6 @@ func AdminMachinesCreateMachine() slack.ModalViewRequest {
 			"titlename_input",
 		),
 	)
-	titleNameInputBlock.Optional = true
 	titleNameInputBlock.Hint = slack.NewTextBlockObject(
 		"plain_text",
 		"The titlecase name of the machine for use in titles and other labels.",
@@ -121,7 +120,6 @@ func AdminMachinesCreateMachine() slack.ModalViewRequest {
 			"count_input",
 		),
 	)
-	countInputBlock.Optional = true
 	countInputBlock.Hint = slack.NewTextBlockObject(
 		"plain_text",
 		"The number of machines of this type.",
