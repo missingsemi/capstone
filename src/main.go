@@ -17,7 +17,7 @@ func main() {
 	database.SqliteInit()
 	defer database.SqliteDeinit()
 
-	controller.RegisterCommandHandler("/test", controller.CommandSchedule)
+	controller.RegisterCommandHandler("/schedule", controller.CommandSchedule)
 	controller.RegisterCallbackHandler("user_schedule-created_sessions-callback", controller.CallbackCreatedSessions)
 	controller.RegisterCallbackHandler("user_schedule-create_session_1-callback", controller.CallbackCreateSession1)
 	controller.RegisterCallbackHandler("user_schedule-create_session_2-callback", controller.CallbackCreateSession2)
