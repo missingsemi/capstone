@@ -3,9 +3,9 @@ package view
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/missingsemi/capstone/model"
+	"github.com/missingsemi/capstone/util"
 	"github.com/slack-go/slack"
 )
 
@@ -43,7 +43,7 @@ func UserMachinesViewSession(session model.ScheduleSession, machine model.Machin
 			),
 			slack.NewTextBlockObject(
 				"mrkdwn",
-				fmt.Sprintf("*Start Time*\n%s", session.Time.Format(time.RFC3339)),
+				fmt.Sprintf("*Start Time*\n%s", session.Time.Format(util.FriendlyFormat)),
 				false,
 				false,
 			),
