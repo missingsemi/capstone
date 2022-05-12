@@ -1,8 +1,19 @@
 class Column extends HTMLElement {
+  color;
+
   constructor() {
     super();
 
     this.attachShadow({mode: 'open'});
+
+    this.color = [
+      '255,0,0',
+      '0,255,0',
+      '0,0,255',
+      '255,255,0',
+      '255,0,255',
+      '0,255,255',
+    ][Math.floor(Math.random() * 6)]
 
     const style = document.createElement('style');
     style.textContent = `
@@ -60,6 +71,7 @@ class Column extends HTMLElement {
     }
 
     if (name === 'column:sessions') {
+      console.log(newValue);
       this.updateSessions(oldValue, newValue);
     }
   }
@@ -76,9 +88,6 @@ class Column extends HTMLElement {
     const prev = JSON.parse(oldValue);
     const curr = JSON.parse(newValue);
     const columnList = this.shadowRoot.querySelector('.column-list');
-    while (columnList.firstChild) {
-      columnList.removeChild(columnList.firstChild);
-    }
     
     // Finding the added and deleted elements so we don't have to update the entire column.
     const currIds = new Set(curr.map(session => session.id));
@@ -104,6 +113,7 @@ class Column extends HTMLElement {
       cs.setAttribute('session:duration', `${session.duration}`);
       cs.setAttribute('session:time', session.time);
       cs.setAttribute('session:name', session.username);
+      cs.setAttribute('session:color', this.color);
       cs.id = `${session.id}`;
       columnList.appendChild(cs);
     }

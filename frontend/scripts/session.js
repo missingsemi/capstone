@@ -11,9 +11,7 @@ class Session extends HTMLElement {
         width: 100%;
         padding-left: 10px;
         padding-right: 10px;
-        background-color: rgba(255, 0, 0, 0.2);
-        border: solid #111115 5px;
-        border-left: solid red 5px;
+        border: solid #111115 1px;
         border-top-left-radius: 5px;
         border-bottom-left-radius: 5px;
         overflow: hidden;
@@ -64,8 +62,13 @@ class Session extends HTMLElement {
     this.shadowRoot.querySelector('.time').childNodes[2].textContent = duration;
   }
 
+  updateColor(color) {
+    this.shadowRoot.querySelector('.session').style = `background-color: rgba(${color},0.1); border-left: 5px solid rgb(${color});`;
+  }
+
   connectedCallback() {
     if (this.isConnected) {
+      this.updateColor(this.getAttribute('session:color'));
       this.updateName(this.getAttribute('session:name'));
       this.updateTime(this.getAttribute('session:time'));
       this.updateDuration(this.getAttribute('session:duration'));
@@ -82,6 +85,9 @@ class Session extends HTMLElement {
       }
       if (name === 'session:duration') {
         this.updateDuration(newValue);
+      }
+      if (name === 'session:color') {
+        this.updateColor(newValue);
       }
     }
   }

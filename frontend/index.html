@@ -16,6 +16,11 @@
     <script src="scripts/calendar.js"></script>
   </head>
   <body>
-    <calendar-calendar />
+    <calendar-calendar id="calendar" />
+    <script>
+      setInterval(() => {
+        document.getElementById('calendar').update();
+      }, 5000);
+    </script>
   </body>
 </html>
