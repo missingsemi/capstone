@@ -11,3 +11,13 @@ func IsUserAdmin(id string) (bool, error) {
 	err = stmt.QueryRow(id).Scan(&result)
 	return result == 1, err
 }
+
+func CreateAdmin(id string) error {
+	stmt, err := db.Prepare("INSERT INTO admins (user_id) VALUES (?);")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	_, err = stmt.Exec(id)
+	return err
+}

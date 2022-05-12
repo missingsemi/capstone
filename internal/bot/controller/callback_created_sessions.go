@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/missingsemi/capstone/internal/bot/view"
@@ -43,7 +45,6 @@ func CallbackCreatedSessions(client *socketmode.Client, event socketmode.Event) 
 
 		return err
 	}
-
 	if actions[0].ActionID == "user_schedule-created_sessions-view_callback" {
 		sessionId, _ := strconv.ParseInt(actions[0].Value, 10, 32)
 
@@ -62,6 +63,9 @@ func CallbackCreatedSessions(client *socketmode.Client, event socketmode.Event) 
 
 	if actions[0].ActionID == "user_schedule-created_sessions-create_callback" {
 		machines, _ := database.GetMachines()
+		v := view.UserScheduleCreateSession1(machines)
+		j, _ := json.Marshal(v)
+		fmt.Println(string(j))
 		slackutil.PushView2(client, callback.TriggerID, view.UserScheduleCreateSession1(machines))
 		client.Ack(*event.Request)
 	}
