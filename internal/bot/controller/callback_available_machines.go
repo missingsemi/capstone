@@ -3,9 +3,9 @@ package controller
 import (
 	"errors"
 
-	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -34,7 +34,7 @@ func CallbackAvailableMachines(client *socketmode.Client, event socketmode.Event
 
 		machines, err := database.GetMachines()
 
-		util.UpdateView2(client, callback.View.ID, view.AdminMachinesAvailableMachines(machines))
+		slackutil.UpdateView2(client, callback.View.ID, view.AdminMachinesAvailableMachines(machines))
 		client.Ack(*event.Request)
 
 		return err
@@ -47,14 +47,14 @@ func CallbackAvailableMachines(client *socketmode.Client, event socketmode.Event
 			return err
 		}
 
-		util.PushView2(client, callback.TriggerID, view.AdminMachinesEditMachine(machine))
+		slackutil.PushView2(client, callback.TriggerID, view.AdminMachinesEditMachine(machine))
 		client.Ack(*event.Request)
 
 		return err
 	}
 
 	if actions[0].ActionID == "admin_machines-available_machines-create_callback" {
-		util.PushView2(client, callback.TriggerID, view.AdminMachinesCreateMachine())
+		slackutil.PushView2(client, callback.TriggerID, view.AdminMachinesCreateMachine())
 		client.Ack(*event.Request)
 	}
 

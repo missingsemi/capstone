@@ -1,4 +1,4 @@
-package util
+package slackutil
 
 import (
 	"github.com/slack-go/slack"

@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/model"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -45,8 +45,7 @@ func CallbackEditMachine(client *socketmode.Client, event socketmode.Event) erro
 		var err error
 		parsedCount, err = strconv.ParseInt(callback.View.State.Values["count_input_block"]["count_input"].Value, 10, 32)
 		if err != nil {
-
-			util.ErrorView(
+			slackutil.ErrorView(
 				client,
 				event,
 				map[string]string{
@@ -68,7 +67,7 @@ func CallbackEditMachine(client *socketmode.Client, event socketmode.Event) erro
 	client.Ack(*event.Request)
 
 	machines, _ := database.GetMachines()
-	util.UpdateView2(client, callback.View.PreviousViewID, view.AdminMachinesAvailableMachines(machines))
+	slackutil.UpdateView2(client, callback.View.PreviousViewID, view.AdminMachinesAvailableMachines(machines))
 
 	return nil
 }

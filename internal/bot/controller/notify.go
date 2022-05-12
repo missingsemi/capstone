@@ -5,7 +5,7 @@ import (
 
 	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
+	"github.com/missingsemi/capstone/internal/database"
 	"github.com/slack-go/slack"
 )
 

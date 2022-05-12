@@ -6,34 +6,36 @@ import (
 	"sync"
 
 	"github.com/joho/godotenv"
-	"github.com/missingsemi/capstone/pkg/bot"
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/server"
+	"github.com/missingsemi/capstone/internal/bot"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/server"
 )
 
 func main() {
 	godotenv.Load()
-	startBot := flag.Bool("bot", true, "If false, doesn't launch the slack bot.")
-	hostServer := flag.Bool("host", true, "If false, doesn't launch the web interface.")
-	port := flag.Int("port", 8080, "Sets the port the web interface is hosted on.")
+	startBot := flag.Bool("bot", true, "Whether or not to launch the slack bot.")
+	hostServer := flag.Bool("website", true, "Whether or not to launch the web interface.")
+	port := flag.Int("port", 8080, "The port to host the web interface on.")
+	dbfile := flag.String("dbfile", "schedule.db", "The path to the sqlite file to store session data in.")
 
 	flag.Parse()
 
-	database.DbInit()
+	database.DbInit(*dbfile)
 	defer database.DbDeinit()
 
 	wg := sync.WaitGroup{}
 
+	appToken := os.Getenv("SLACK_APP_TOKEN")
+	botToken := os.Getenv("SLACK_BOT_TOKEN")
+
 	if *startBot {
-		appToken := os.Getenv("SLACK_APP_TOKEN")
-		botToken := os.Getenv("SLACK_BOT_TOKEN")
 		wg.Add(1)
 		go bot.Start(appToken, botToken, &wg)
 	}
 
 	if *hostServer {
 		wg.Add(1)
-		go server.Start(*port, &wg)
+		go server.Start(*port, appToken, botToken, &wg)
 	}
 
 	wg.Wait()

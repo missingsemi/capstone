@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/model"
 )
 
 func GenerateValidTimes(machine model.Machine, duration int) []time.Time {

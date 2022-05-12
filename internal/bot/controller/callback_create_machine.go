@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/model"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -27,7 +27,7 @@ func CallbackCreateMachine(client *socketmode.Client, event socketmode.Event) er
 		errors := make(map[string]string, 1)
 		errors["count_input_block"] = "Count must be an integer"
 
-		util.ErrorView(client, event, errors)
+		slackutil.ErrorView(client, event, errors)
 
 		return err
 	}
@@ -42,7 +42,7 @@ func CallbackCreateMachine(client *socketmode.Client, event socketmode.Event) er
 	client.Ack(*event.Request)
 
 	machines, _ := database.GetMachines()
-	util.UpdateView2(client, callback.View.PreviousViewID, view.AdminMachinesAvailableMachines(machines))
+	slackutil.UpdateView2(client, callback.View.PreviousViewID, view.AdminMachinesAvailableMachines(machines))
 
 	return nil
 }

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -38,7 +38,7 @@ func CallbackCreatedSessions(client *socketmode.Client, event socketmode.Event) 
 		sessions, err := database.GetUpcomingSessionsByUser(callback.User.ID)
 		machines, err := database.GetMachines()
 
-		util.UpdateView2(client, callback.View.ID, view.UserScheduleCreatedSessions(sessions, machines))
+		slackutil.UpdateView2(client, callback.View.ID, view.UserScheduleCreatedSessions(sessions, machines))
 		client.Ack(*event.Request)
 
 		return err
@@ -54,7 +54,7 @@ func CallbackCreatedSessions(client *socketmode.Client, event socketmode.Event) 
 		}
 		machine, _ := database.GetMachineById(session.Machine)
 
-		util.PushView2(client, callback.TriggerID, view.UserMachinesViewSession(session, machine))
+		slackutil.PushView2(client, callback.TriggerID, view.UserMachinesViewSession(session, machine))
 		client.Ack(*event.Request)
 
 		return err
@@ -62,7 +62,7 @@ func CallbackCreatedSessions(client *socketmode.Client, event socketmode.Event) 
 
 	if actions[0].ActionID == "user_schedule-created_sessions-create_callback" {
 		machines, _ := database.GetMachines()
-		util.PushView2(client, callback.TriggerID, view.UserScheduleCreateSession1(machines))
+		slackutil.PushView2(client, callback.TriggerID, view.UserScheduleCreateSession1(machines))
 		client.Ack(*event.Request)
 	}
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/missingsemi/capstone/internal/bot/util"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/model"
 	"github.com/slack-go/slack"
 )
 

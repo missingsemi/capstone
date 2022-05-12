@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/model"
 )
 
 func GetSessions() ([]model.ScheduleSession, error) {

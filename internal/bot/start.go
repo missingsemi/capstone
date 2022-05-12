@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/missingsemi/capstone/internal/bot/controller"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -43,18 +44,7 @@ func Start(appToken string, botToken string, wg *sync.WaitGroup) {
 		panic("SLACK_BOT_TOKEN is not a valid token")
 	}
 
-	api := slack.New(
-		botToken,
-		slack.OptionDebug(true),
-		//slack.OptionLog(log.New(os.Stdout, "api: ", log.Lshortfile|log.LstdFlags)),
-		slack.OptionAppLevelToken(appToken),
-	)
-
-	client := socketmode.New(
-		api,
-		socketmode.OptionDebug(true),
-		//socketmode.OptionLog(log.New(os.Stdout, "socket: ", log.Lshortfile|log.LstdFlags)),
-	)
+	api, client := slackutil.Client(appToken, botToken)
 
 	go controller.Notify(api)
 

@@ -5,8 +5,19 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/missingsemi/capstone/pkg/database"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/slackutil"
 )
+
+type scheduleBody struct {
+	Id         int      `json:"id"`
+	Username   string   `json:"username"`
+	GroupNames []string `json:"groupNames"`
+	Machine    string   `json:"machine"`
+	Reason     string   `json:"reason"`
+	Duration   int      `json:"duration"`
+	Time       string   `json:"time"`
+}
 
 func HandleSchedule(w http.ResponseWriter, req *http.Request) {
 	// parse date from query params
@@ -37,8 +48,40 @@ func HandleSchedule(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	cachedUsernames := make(map[string]string, 0)
+
+	body := make([]scheduleBody, 0, len(sessions))
+	_, apiClient := slackutil.Client("", "")
+	for _, session := range sessions {
+		if _, ok := cachedUsernames[session.UserId]; !ok {
+			username, _ := slackutil.GetUsername(apiClient, session.UserId)
+			cachedUsernames[session.UserId] = username
+		}
+
+		groupNames := make([]string, 0, len(session.GroupIds))
+		for _, groupId := range session.GroupIds {
+			if username, ok := cachedUsernames[groupId]; !ok {
+				username, _ = slackutil.GetUsername(apiClient, groupId)
+				cachedUsernames[groupId] = username
+				groupNames = append(groupNames, username)
+			} else {
+				groupNames = append(groupNames, username)
+			}
+		}
+
+		body = append(body, scheduleBody{
+			Id:         session.Id,
+			Username:   cachedUsernames[session.UserId],
+			GroupNames: groupNames,
+			Machine:    session.Machine,
+			Reason:     session.Reason,
+			Duration:   int(session.Duration),
+			Time:       session.Time.Format(time.RFC3339),
+		})
+	}
+
 	// generate body and 500 on fail
-	j, err := json.Marshal(sessions)
+	j, err := json.Marshal(body)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

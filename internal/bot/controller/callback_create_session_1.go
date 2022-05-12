@@ -6,8 +6,9 @@ import (
 
 	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/model"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -35,7 +36,7 @@ func CallbackCreateSession1(client *socketmode.Client, event socketmode.Event) e
 
 	validTimes := util.GenerateValidTimes(machine, int(durationInputBlock))
 
-	util.UpdateView(client, event, view.UserScheduleCreateSession2(session, validTimes))
+	slackutil.UpdateView(client, event, view.UserScheduleCreateSession2(session, validTimes))
 
 	return nil
 }

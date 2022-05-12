@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/missingsemi/capstone/internal/bot/util"
 	"github.com/missingsemi/capstone/internal/bot/view"
-	"github.com/missingsemi/capstone/pkg/database"
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/database"
+	"github.com/missingsemi/capstone/internal/model"
+	"github.com/missingsemi/capstone/internal/slackutil"
 	"github.com/slack-go/slack"
 	"github.com/slack-go/slack/socketmode"
 )
@@ -30,7 +30,7 @@ func CallbackCreateSession2(client *socketmode.Client, event socketmode.Event) e
 
 	sessions, _ := database.GetUpcomingSessionsByUser(session.UserId)
 	machines, _ := database.GetMachines()
-	util.UpdateView2(client, callback.View.PreviousViewID, view.UserScheduleCreatedSessions(sessions, machines))
+	slackutil.UpdateView2(client, callback.View.PreviousViewID, view.UserScheduleCreatedSessions(sessions, machines))
 	client.Ack(*event.Request)
 	return nil
 }

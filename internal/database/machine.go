@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/missingsemi/capstone/pkg/model"
+	"github.com/missingsemi/capstone/internal/model"
 )
 
 func GetMachines() ([]model.Machine, error) {

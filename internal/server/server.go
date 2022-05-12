@@ -5,9 +5,25 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"strings"
+	"sync"
+
+	"github.com/missingsemi/capstone/internal/slackutil"
 )
 
-func Start(port int) {
+func Start(port int, appToken string, botToken string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	if appToken == "" {
+		panic("SLACK_APP_TOKEN must be set.")
+	}
+
+	if !strings.HasPrefix(appToken, "xapp-") {
+		panic("SLACK_APP_TOKEN is not a valid token")
+	}
+
+	slackutil.Client(appToken, botToken)
+
 	RegisterRoutes()
 
 	mime.AddExtensionType(".js", "text/javascript")
