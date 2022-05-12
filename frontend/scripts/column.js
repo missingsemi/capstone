@@ -71,7 +71,6 @@ class Column extends HTMLElement {
     }
 
     if (name === 'column:sessions') {
-      console.log(newValue);
       this.updateSessions(oldValue, newValue);
     }
   }
@@ -100,7 +99,7 @@ class Column extends HTMLElement {
     const deletedIds = prevIds.filter(id => !currSet.has(id));
 
     for (const id of deletedIds) {
-      columnList.removeChild(columnList.getElementById(`${id}`));
+      columnList.removeChild(columnList.querySelector(`#sid${id}`));
     }
 
     for (const session of added) {
@@ -114,7 +113,7 @@ class Column extends HTMLElement {
       cs.setAttribute('session:time', session.time);
       cs.setAttribute('session:name', session.username);
       cs.setAttribute('session:color', this.color);
-      cs.id = `${session.id}`;
+      cs.id = `sid${session.id}`;
       columnList.appendChild(cs);
     }
   }

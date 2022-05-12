@@ -19,9 +19,9 @@ class Session extends HTMLElement {
       }
 
       .name {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
         font-weight: bold;
-        line-height: 1.5rem;
+        line-height: 1.1rem;
         margin-top: 5px;
         margin-bottom: 5px;
         box-sizing: border-box;
